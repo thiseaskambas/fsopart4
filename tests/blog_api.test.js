@@ -82,6 +82,30 @@ test('Blogs cannot be created if missing title or url', async () => {
   expect(res.body).toHaveLength(helper.initialBlogs.length);
 });
 
+test('find by id and delete', async () => {
+  const blogs = await Blog.find({});
+  const index = Math.floor(Math.random() * blogs.length);
+  const id = blogs[index].id;
+  console.log({ id });
+  await api.delete(`/api/blogs/${id}`).expect(204);
+  const endBlogs = await Blog.find({});
+  const ids = endBlogs.map(blog => blog.id);
+  expect(ids).not.toContain(id);
+});
+
+test('find by id and update likes', async () => {
+  const blogs = await Blog.find({});
+  const index = Math.floor(Math.random() * blogs.length);
+  const id = blogs[index].id;
+  const randomLikes = Math.floor(Math.random() * 9999);
+  const res = await api
+    .put(`/api/blogs/${id}`)
+    .send({ likes: randomLikes })
+    .expect(200);
+
+  expect(res.body.likes).toEqual(randomLikes);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
