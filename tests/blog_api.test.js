@@ -35,26 +35,51 @@ test('Id is defined', async () => {
 });
 
 test('Blogs are saved to the DB', async () => {
-  const newBlog = await Blog.create({
+  const newBlog = {
     title: 'Test',
     author: 'test test',
     url: 'test.test.com',
     likes: 15
-  });
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
   const res = await api.get('/api/blogs');
   expect(res.body).toHaveLength(helper.initialBlogs.length + 1);
   expect(res.body[res.body.length - 1].title).toBe('Test');
 });
 
 test('Likes default to 0 if missing from the request', async () => {
-  const newBlog = await Blog.create({
+  const newBlog = {
     title: 'Test',
     author: 'test test',
     url: 'test.test.com'
-  });
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
   const res = await api.get('/api/blogs');
   expect(res.body).toHaveLength(helper.initialBlogs.length + 1);
   expect(res.body[res.body.length - 1].likes).toBe(0);
+});
+
+test('Blogs cannot be created if missing title or url', async () => {
+  const newBlog = {
+    likes: 12,
+    author: 'test test'
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400);
+
+  const res = await api.get('/api/blogs');
+  expect(res.body).toHaveLength(helper.initialBlogs.length);
 });
 
 afterAll(() => {
