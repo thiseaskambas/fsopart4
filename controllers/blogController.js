@@ -1,20 +1,25 @@
 const express = require('express');
 const Blog = require('../models/blogModel');
+const catchAsync = require('../utils/catchAsync');
 
 const router = express.Router();
 
-router.get('/', (request, response) => {
-  Blog.find({}).then(blogs => {
+router.get(
+  '/',
+  catchAsync(async (request, response) => {
+    const blogs = await Blog.find({});
     response.json(blogs);
-  });
-});
+  })
+);
 
-router.post('/', (request, response) => {
-  const blog = new Blog(request.body);
+router.post(
+  '/',
+  catchAsync(async (request, response) => {
+    const blog = new Blog(request.body);
 
-  blog.save().then(result => {
-    response.status(201).json(result);
-  });
-});
+    const newBlog = await blog.save();
+    response.status(201).json(newBlog);
+  })
+);
 
 module.exports = router;
