@@ -1,5 +1,3 @@
-const Blog = require('../models/blogModel');
-
 const initialBlogs = [
   {
     _id: '5a422a851b54a676234d17f7',
@@ -52,6 +50,12 @@ const initialBlogs = [
     likes: 2,
     __v: 0
   }
+];
+
+initialUsers = [
+  { username: 'test', name: 'test', password: 'test' },
+  { username: 'test1', name: 'test1', password: 'test1' },
+  { username: 'test2', name: 'test2', password: 'test2' }
 ];
 
 module.exports = { initialBlogs };

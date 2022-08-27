@@ -62,7 +62,7 @@ const initialBlogs = [
 
 const app = express();
 
-const mongoUrl = process.env.DB_URL_TEST;
+const mongoUrl = process.env.DB_URL;
 mongoose.connect(mongoUrl).then(() => logger.info('connected to DB'));
 
 app.use(cors());
