@@ -17,17 +17,12 @@ router.get(
 router.post(
   '/',
   catchAsync(async (req, res, next) => {
+    const { user } = req;
     if (!req.body.title || !req.body.url) {
       return response
         .status(400)
         .json({ error: 'blogs must contain a title and a url' });
     }
-    const token = req.token;
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token missing or invalid' });
-    }
-    const user = await User.findById(decodedToken.id);
     const blog = new Blog({
       author: user.id,
       title: req.body.title,
@@ -43,7 +38,11 @@ router.post(
 router.delete(
   '/:id',
   catchAsync(async (req, res, next) => {
-    await Blog.findByIdAndDelete(req.params.id);
+    const { user } = req;
+    const blogTodelete = await Blog.findById(req.params.id);
+    if (blogTodelete.author.toString() === user.id) {
+      await Blog.findByIdAndDelete(req.params.id);
+    }
     res.status(204).end();
   })
 );
