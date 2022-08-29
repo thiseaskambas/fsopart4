@@ -1,15 +1,13 @@
-const jwt = require('jsonwebtoken');
 const express = require('express');
 const Blog = require('../models/blogModel');
-const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
-const middleware = require('../utils/middleware');
+
 const router = express.Router();
 
 router.get(
   '/',
   catchAsync(async (request, response, next) => {
-    const blogs = await Blog.find({}).populate('author', { name: 1 });
+    const blogs = await Blog.find({}).populate('user', { name: 1 });
     response.json(blogs);
   })
 );
@@ -24,11 +22,12 @@ router.post(
         .json({ error: 'blogs must contain a title and a url' });
     }
     const blog = new Blog({
-      author: user.id,
+      user: user.id,
       title: req.body.title,
-      url: req.body.url
+      url: req.body.url,
+      author: req.body.author
     });
-    const newBlog = await blog.save();
+    const newBlog = await (await blog.save()).populate('user');
     user.blogs = [...user.blogs, newBlog._id];
     await user.save();
     res.status(201).json(newBlog);
@@ -40,7 +39,7 @@ router.delete(
   catchAsync(async (req, res, next) => {
     const { user } = req;
     const blogTodelete = await Blog.findById(req.params.id);
-    if (blogTodelete.author.toString() === user.id) {
+    if (blogTodelete.user.toString() === user.id) {
       await Blog.findByIdAndDelete(req.params.id);
     }
     res.status(204).end();
